@@ -26,8 +26,6 @@ parameters:
     instance_max_machines[i] := provider_max_machines[p];
     transfer_price_in[i] := transfer_price_in[p];
     transfer_price_out[i] := transfer_price_out[p];
-    echo i;
-    echo instance_max_machines[i];
 
     {s in storages:
       transfer_rate[s,i] := transfer_rate[s,p];
@@ -63,7 +61,6 @@ constraints:
     sum { l in layers : LayerTime[l] } <= workflow_deadline;
 
   keep_layer_time {l in layers:
-    echo l;
     LayerTime[l] <= LayerDeadline[l];
     LayerDeadline[l] <= LayerTime[l] + 1;
   }

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
-require_relative 'problem'
+require_relative 'cmpl'
 require 'pp'
 require 'yaml'
 
@@ -35,7 +35,7 @@ schema = {
       workflow_deadline: Numeric
     }
 
-problem = Problem.new schema
+problem = Problem.new schema, debug: true
 problem.params = YAML.load_file('infrastructure.yaml')
 
 result = problem.run!
