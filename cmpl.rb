@@ -103,7 +103,7 @@ module DataGenerator
 end
 
 class Problem
-  Solution = Struct.new(:objective, :vars) do
+  Solution = Struct.new(:objective, :vars, :exit_code, :debug) do
     def method_missing(m, *args, &block) 
       self.vars[m.to_s]
     end
@@ -123,11 +123,12 @@ class Problem
   
   attr_accessor :params
   
-  def initialize(schema, model_file='workflow.cmpl', cmpl_opts = ['-s'])
+  def initialize(schema, model_file:'workflow.cmpl', cmpl_opts: ['-s'], debug: false)
     @model_file = model_file
     @cmpl_opts = cmpl_opts
     @schema = schema
     @params = {}
+    @debug = debug
 
     DataGenerator.validate_schema(@schema)
   end
@@ -163,27 +164,44 @@ class Problem
     end
     
     objective = Objective.new(data[:general][:objective_name], data[:solution][:@value].to_f, data[:solution][:@status])
-    Solution.new(objective,vars)
+    [objective, vars]
   end
 
   def run!
     data = self.generate_data        
-#    tmpfile = Dir::Tmpname.make_tmpname(['cmpl_',''], nil)
-    tmpfile = "test"
+        
+    Dir.mkdir('tmp') unless Dir.exist?('tmp/')
+    tmpfile = if @debug
+        'tmp/' + Dir::Tmpname.make_tmpname(['cmpl_',''], nil)
+      else
+        "tmp/test"
+      end
     solution_file = tmpfile + ".sol"
     data_file = tmpfile + ".cdat"
 
+    warn "Writing data to #{data_file}..."
     IO.write(data_file, data)
 
     args = ['cmpl', @model_file, '-solution', solution_file, '-data', data_file]
     args += @cmpl_opts
 
     cmpl_output = nil
+    warn "Starting CMPL..."
     process = IO.popen(args, "r") do |cmpl|
       cmpl_output = cmpl.read
     end
+    exit_code = $?
     solution_xml = IO.read(solution_file)
-    [Problem.parse_results(solution_xml), cmpl_output]
+    
+    unless @debug
+      File.unlink(solution_file)
+      File.unlink(data_file)
+      puts cmpl_output
+    end
+
+    warn "Optimization complete"
+    objective, vars = Problem.parse_results(solution_xml)
+    Solution.new(objective, vars, exit_code, cmpl_output)
   end
 
 end
