@@ -1,4 +1,3 @@
-workflow_deadline: 2
 request_price: 0.00001
 storages:
   S3:
@@ -13,22 +12,22 @@ storage_local_rel:
   - [CloudFiles, rackspace]
 
 transfer_rate:
-  - [S3, amazon, 20]
-  - [S3, rackspace, 20]
-  - [S3, gogrid, 20]
+  - [S3, amazon, 50]
+  - [S3, rackspace, 30]
+  - [S3, gogrid, 30]
   - [S3, elastichosts, 20]
-  # - [S3, private, 20]
+  - [S3, private, 15]
   - [CloudFiles, amazon, 20]
-  - [CloudFiles, rackspace, 20]
+  - [CloudFiles, rackspace, 60]
   - [CloudFiles, gogrid, 20]
-  - [CloudFiles, elastichosts, 20]
-  # - [CloudFiles, private, 20]
+  - [CloudFiles, elastichosts, 25]
+  - [CloudFiles, private, 20]
 
 providers:
   amazon:
     provider_max_machines: 20
     transfer_price_in: 0.0
-    transfer_price_out: 42.0
+    transfer_price_out: 0.0001
     instances:
       - m2-4xlarge
       - m2-2xlarge
@@ -65,141 +64,74 @@ providers:
       - eh-4gb-8gh
       - eh-2gb-4gh
       - eh-1gb-2gh
-  # private:
-  #   provider_max_machines: 10
-  #   transfer_price_in: 0.0
-  #   transfer_price_out: 0.0
-  #   instances:
-  #     - priv-small
+  private:
+    provider_max_machines: 10
+    transfer_price_in: 0.0
+    transfer_price_out: 0.0
+    instances:
+      - priv-small
 
 instances:
   m2-4xlarge:
-    instance_price: 2.400000
-    ccu: 27.250000
+    instance_price: 2.40
+    ccu: 27.25
   m2-2xlarge:
-    instance_price: 1.200000
-    ccu: 14.890000
+    instance_price: 1.20
+    ccu: 14.89
   linux-c1-xlarge:
-    instance_price: 0.680000
-    ccu: 8.780000
+    instance_price: 0.68
+    ccu:  8.78
   m2-xlarge:
-    instance_price: 0.500000
-    ccu: 7.050000
+    instance_price: 0.50
+    ccu:  7.05
   m1-xlarge:
-    instance_price: 0.680000
-    ccu: 5.150000
+    instance_price: 0.68
+    ccu:  5.15
   m1-large:
-    instance_price: 0.340000
-    ccu: 4.080000
+    instance_price: 0.34
+    ccu:  4.08
   c1-medium:
-    instance_price: 0.170000
-    ccu: 3.430000
+    instance_price: 0.17
+    ccu:  3.43
   m1-small:
-    instance_price: 0.085000
-    ccu: 0.920000
+    instance_price: 0.085
+    ccu:  0.92
   rs-16gb:
-    instance_price: 0.960000
-    ccu: 4.950000
+    instance_price: 0.96
+    ccu:  4.95
   rs-2gb:
-    instance_price: 0.120000
-    ccu: 4.940000
+    instance_price: 0.12
+    ccu:  4.94
   rs-1gb:
-    instance_price: 0.060000
-    ccu: 4.930000
+    instance_price: 0.06
+    ccu:  4.93
   rs-4gb:
-    instance_price: 0.240000
-    ccu: 4.900000
+    instance_price: 0.24
+    ccu:  4.90
   gg-8gb:
-    instance_price: 1.520000
-    ccu: 23.200000
+    instance_price: 1.52
+    ccu: 23.20
   gg-4gb:
-    instance_price: 0.760000
-    ccu: 9.280000
+    instance_price: 0.76
+    ccu:  9.28
   gg-2gb:
-    instance_price: 0.380000
-    ccu: 4.870000
+    instance_price: 0.38
+    ccu:  4.87
   gg-1gb:
-    instance_price: 0.190000
-    ccu: 4.420000
+    instance_price: 0.19
+    ccu:  4.42
   eh-8gb-20gh:
-    instance_price: 0.654000
-    ccu: 9.980000
+    instance_price: 0.654
+    ccu:  9.98
   eh-4gb-8gh:
-    instance_price: 0.326000
-    ccu: 5.540000
+    instance_price: 0.326
+    ccu:  5.54
   eh-2gb-4gh:
-    instance_price: 0.164000
-    ccu: 4.750000
+    instance_price: 0.164
+    ccu:  4.75
   eh-1gb-2gh:
-    instance_price: 0.082000
-    ccu: 4.300000
-  # priv-small:
-  #   instance_price: 0.000000
-  #   ccu: 1.000000
-
-tasks:
-  T_MontagemProjectPP:
-    task_count: 5
-    exec_time: 0.003776
-    data_size_in: 4.026779
-    data_size_out: 7.948205
-  T_MontagemDiffFit:
-    task_count: 9
-    exec_time:  0.002944
-    data_size_in: 15.012199
-    data_size_out: 0.389744
-  T_MontagemConcatFit:
-    task_count: 1
-    exec_time:  0.000200
-    data_size_in: 0.389977
-    data_size_out: 0.001801
-  T_MontagemBgModel:
-    task_count: 1
-    exec_time: 0.000394
-    data_size_in: 0.002600
-    data_size_out: 0.000253
-  T_MontagemBackground:
-    task_count: 5
-    exec_time:  0.002975
-    data_size_in: 7.948458
-    data_size_out: 7.948205
-  T_MontagemImgTbl:
-    task_count: 1
-    exec_time: 0.000386
-    data_size_in: 39.741824
-    data_size_out: 0.001525
-  T_MontagemAdd:
-    task_count: 1
-    exec_time: 0.000842
-    data_size_in: 0.001815
-    data_size_out: 88.710049
-  T_MontagemShrink:
-    task_count: 1
-    exec_time: 0.001072
-    data_size_in: 88.710049
-    data_size_out: 1.774911
-  T_MontagemJPEG :
-    task_count: 1
-    exec_time: 0.000125
-    data_size_in: 1.774911
-    data_size_out: 0.195366
-
-layers:
-  L_MontagemProjectPP:
-    tasks: ['T_MontagemProjectPP']
-  L_MontagemDiffFit:
-    tasks: ['T_MontagemDiffFit']
-  L_MontagemConcatFit:
-    tasks: ['T_MontagemConcatFit']
-  L_MontagemBgModel:
-    tasks: ['T_MontagemBgModel']
-  L_MontagemBackground:
-    tasks: ['T_MontagemBackground']
-  L_MontagemImgTbl:
-    tasks: ['T_MontagemImgTbl']
-  L_MontagemAdd:
-    tasks: ['T_MontagemAdd']
-  L_MontagemShrink:
-    tasks: ['T_MontagemShrink']
-  L_MontagemJPEG:
-    tasks: ['T_MontagemJPEG']
+    instance_price: 0.082
+    ccu:  4.30
+  priv-small:
+    instance_price: 0.00
+    ccu:  1.00

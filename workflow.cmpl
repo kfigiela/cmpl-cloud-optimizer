@@ -1,12 +1,13 @@
 #!/usr/bin/cmpl
 %opt cbc threads 2
-%data: providers set, instances set, storages set, provider_max_machines[providers], instance_price[instances], ccu[instances], transfer_price_out[providers], transfer_price_in[providers], storages_transfer_price_in[storages], storages_transfer_price_out[storages], transfer_rate[storages, providers], request_price, tasks set, layers set, task_count[tasks], exec_time[tasks], data_size_in[tasks], data_size_out[tasks], workflow_deadline, storage_local_rel set[2], providers_instances set[2], layers_tasks set[2]
+%opt cbc verbose 2
+%opt cbc ratio 0.1
+%data: providers set, instances set, storages set, provider_max_machines[providers], instance_price[instances], ccu[instances], transfer_price_out[providers], transfer_price_in[providers], storages_transfer_price_in[storages], storages_transfer_price_out[storages], transfer_rate[storages, providers], request_price, tasks set, layers set, task_count[tasks], exec_time[tasks], data_size_in[tasks], data_size_out[tasks], workflow_deadline, storage_local_rel set[2], providers_instances set[2], layers_tasks set[2], storage
 %display nonZeros
 %display var *
 %display con none
 
 parameters:
-  storage := "S3";
 
   # Pre-process data relations from tuples to array of sets
   {s in storages:
@@ -42,7 +43,10 @@ parameters:
 
   {t in tasks, i in instances, s in storages:
       transfer_time[t,i,s] :=  ((data_size_in[t]+data_size_out[t]) / (transfer_rate[s,i] * 3600));
-      unit_time[t,i,s] := exec_time[t] / ccu[i];  # , transfer_time[t,i,storage] > ); #TODO
+      {exec_time[t] / ccu[i] > transfer_time[t,i,storage]: 
+        unit_time[t,i,s] := exec_time[t] / ccu[i]; 
+        | default: unit_time[t,i,s] :=  transfer_time[t,i,storage];
+      }
       transfer_cost[t,i,s] := (data_size_out[t] * (transfer_price_out[i]+storages_transfer_price_in[s]) + data_size_in[t] * (storages_transfer_price_out[s]+transfer_price_in[i])) * local[i,s];
   }
 
@@ -54,14 +58,16 @@ variables:
   LayerTime[layers]: real [0..workflow_deadline];
 
 objectives:
-  cost: sum { t in tasks, i in instances, idx in instance_sets[i]: instance_price[i] * InstanceHours[t,i,idx] + (request_price + transfer_cost[t,i,storage])*InstanceTasks[t,i,idx] } -> min;
+  cost: sum { t in tasks, i in instances, idx in instance_sets[i]: 
+      instance_price[i] * InstanceHours[t,i,idx] + (request_price + transfer_cost[t,i,storage])*InstanceTasks[t,i,idx] 
+    } -> min;
 
 constraints:
   keep_layer_deadlines_sum_under_workflow_deadline:
     sum { l in layers : LayerTime[l] } <= workflow_deadline;
 
   keep_layer_time {l in layers:
-    LayerTime[l] <= LayerDeadline[l];
+    LayerTime[l]     <= LayerDeadline[l];
     LayerDeadline[l] <= LayerTime[l] + 1;
   }
 

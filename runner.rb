@@ -32,13 +32,27 @@ schema = {
       layers: { 
         tasks: DataGenerator::Tuple.new([:tasks])
       },
-      workflow_deadline: Numeric
+      workflow_deadline: Numeric,
+      storage: Symbol
     }
 
 problem = Problem.new schema, debug: true
-problem.params = YAML.load_file('infrastructure.yaml')
 
-result = problem.run!
-pp result
+infrastructure = YAML.load_file('infrastructure.yaml')
+workflow = YAML.load_file('workflow.yaml')
 
-binding.pry
+problem.params = infrastructure.merge(workflow)
+
+problem.params["storage"] = "S3"
+# result = problem.run!
+# pp result
+2.downto(1).each do |deadline|
+  problem.params["workflow_deadline"] = deadline
+  result = problem.run!
+  File.open("outs/#{deadline}.yaml", 'w' ) do |out|
+    YAML.dump(result, out)
+  end
+  File.open("out.txt", 'a') do |out|
+    out.puts "%3d    %s" % [deadline, result.objective.value.inspect]
+  end
+end
