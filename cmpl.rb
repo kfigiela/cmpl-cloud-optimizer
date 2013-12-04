@@ -96,11 +96,15 @@ class Problem
     args = ['cmpl', @model_file, '-solution', solution_file, '-data', data_file]
     args += @cmpl_opts
 
-    cmpl_output = nil
+    cmpl_output = ""
     warn "Starting CMPL..."
     exec_time = Benchmark::measure do 
-      process = IO.popen(args, "r") do |cmpl|
-        cmpl_output = cmpl.read
+      process = IO.popen(args, "r", err: [:child, :out]) do |cmpl|
+        while !cmpl.eof?
+          data = cmpl.read(1)
+          cmpl_output += data
+          $stderr.print data
+        end
       end
     end
     # Kernel.system(*args);
