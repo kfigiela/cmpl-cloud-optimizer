@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+require 'net/ssh'
+require 'net/sftp'
+require 'tempfile'
+require 'size_units'
+require 'yaml'
+
+ssh_config = YAML.load_file(__dir__ + "/OSSolverService.yml")
+
+config = File.read(ARGV[1])
+
+confFile = ARGV[1]
+osil = (config.match /-osil "(.*?)"/)[1]
+osrl = (config.match /-osrl "(.*?)"/)[1]
+osol = (config.match /-osol "(.*?)"/)[1]
+
+in_files = [confFile, osil, osol]
+out_files = [osrl]
+
+Net::SSH.start(ssh_config[:host], ssh_config[:user], ssh_config[:options]) do |ssh|
+  tmpname = Dir::Tmpname.make_tmpname(['cmpl_',''], nil)
+  tmppath = 'solver/'+tmpname
+  
+  warn "SSH temporary path: #{tmppath}"
+  ssh.sftp.mkdir!(tmppath)
+  in_files.each do |file|
+    warn "Uploading #{file} file #{File.size(file).human_size}"
+    ssh.sftp.upload!(file, tmppath+'/'+file)
+  end
+  
+  warn "Starting optimization"
+  process = ssh.exec("cd #{tmppath}; /afs/crc.nd.edu/user/k/kfigiela/cmpl/Cmpl/Thirdparty/COIN-OS/OSSolverService #{ARGV.join(' ')}")
+  process.wait
+  
+  
+  out_files.each do |file|
+    warn "Optimization complete, fetching #{file}: #{ssh.sftp.stat!(tmppath+'/'+file).size.human_size}"
+    ssh.sftp.download!(tmppath+'/'+file, file)
+  end
+  warn "Results fetched"
+end
+
+### Example OSSolverService.yml
+# :host: my.super.host.example.com
+# :user: solver-user
+# :options: 
+#   :password: "solver-user password if, no need to define if using ssh pubkey" 
+
