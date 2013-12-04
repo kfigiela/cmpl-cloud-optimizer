@@ -37,8 +37,8 @@ parameters:
       instance_sets_1[i] := set(1..instance_max_machines[i]-1);
   }
 
-  {p in providers, i in provider_instances[p], s in storages: 
-    {p << storage_local[s]: local[i,s] := 1.0; | default: local[i,s] := 0.0; } 
+  {s in storages, p in providers, i in provider_instances[p]: 
+    {p << storage_local[s]: non_local[i,s] := 0.0; | default: non_local[i,s] := 1.0; } 
   }
 
   {t in tasks, i in instances, s in storages:
@@ -47,7 +47,7 @@ parameters:
         unit_time[t,i,s] := exec_time[t] / ccu[i]; 
         | default: unit_time[t,i,s] :=  transfer_time[t,i,s];
       }
-      transfer_cost[t,i,s] := (data_size_out[t] * (transfer_price_out[i]+storages_transfer_price_in[s]) + data_size_in[t] * (storages_transfer_price_out[s]+transfer_price_in[i])) * local[i,s];
+      transfer_cost[t,i,s] := (data_size_out[t] * (transfer_price_out[i]+storages_transfer_price_in[s]) + data_size_in[t] * (storages_transfer_price_out[s]+transfer_price_in[i])) * non_local[i,s];
   }
 
 variables:
