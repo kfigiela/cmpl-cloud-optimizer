@@ -1,5 +1,3 @@
-workflow_deadline: 2
-storage: "S3"
 tasks:
   T_MontagemProjectPP:
     task_count: 82
