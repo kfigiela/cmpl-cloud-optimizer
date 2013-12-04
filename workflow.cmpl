@@ -43,9 +43,9 @@ parameters:
 
   {t in tasks, i in instances, s in storages:
       transfer_time[t,i,s] :=  ((data_size_in[t]+data_size_out[t]) / (transfer_rate[s,i] * 3600));
-      {exec_time[t] / ccu[i] > transfer_time[t,i,storage]: 
+      {exec_time[t] / ccu[i] > transfer_time[t,i,s]: 
         unit_time[t,i,s] := exec_time[t] / ccu[i]; 
-        | default: unit_time[t,i,s] :=  transfer_time[t,i,storage];
+        | default: unit_time[t,i,s] :=  transfer_time[t,i,s];
       }
       transfer_cost[t,i,s] := (data_size_out[t] * (transfer_price_out[i]+storages_transfer_price_in[s]) + data_size_in[t] * (storages_transfer_price_out[s]+transfer_price_in[i])) * local[i,s];
   }
